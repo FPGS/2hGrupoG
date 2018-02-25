@@ -53,6 +53,7 @@
                             <field name="price"/>
                             <field name="typeContainer"/>
                             <field name="sugar"/>
+                            <field name="percentage_sugar" widget="progressbar"/>
                             <field name="pulpa"/>
                             <field name="bodega_id"/>
                         </group>
@@ -65,7 +66,7 @@
             <field name="name">Zumos</field>
             <field name="res_model">vinoteca.zumo</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,graph</field>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">Registra el primer zumo!
                 </p>
@@ -76,15 +77,27 @@
             <field name="name">zumo.tree</field>
             <field name="model">vinoteca.zumo</field>
             <field name="arch" type="xml">
-                <tree string="Zumo Tree">
+                <tree string="Zumo Tree" decoration-info="sugar&lt;5" decoration-danger="sugar&gt;15">
                     <field name="name"/>
                     <field name="code"/>
                     <field name="price"/>
                     <field name="typeContainer"/>
-                    <field name="sugar"/>
+                    <field name="sugar" invisible="1"/>
+                    <field name="percentage_sugar" widget="progressbar"/>
                     <field name="pulpa"/>
                     <field name="bodega_id"/>
                 </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="vinoteca_zumo_graph_view">
+            <field name="name">vinoteca.zumo.graph</field>
+            <field name="model">vinoteca.zumo</field>
+            <field name="arch" type="xml">
+                <graph string="Precio por zumo">
+                    <field name="name"/>
+                    <field name="price" type="measure"/>
+                </graph>
             </field>
         </record>
 
@@ -107,7 +120,7 @@
                         <group>
                             <field name="name"/>
                         </group>
-                        <notebook>
+                        <notebook> <!---->
                             <page string="Compras">
                                 <field name="compras_ids">
                                     <tree string="Datos de compra del cliente">
@@ -152,6 +165,7 @@
                         <group>
                             <field name="code"/>
                             <field name="date"/>
+                            <field name="cliente_id"/>
                         </group>
                         <notebook>
                             <page string="Productos">
@@ -175,7 +189,7 @@
             <field name="name">Compra</field>
             <field name="res_model">vinoteca.compra</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,calendar,kanban</field>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">Registra la primera compra!
                 </p>
@@ -186,10 +200,61 @@
             <field name="name">compra.tree</field>
             <field name="model">vinoteca.compra</field>
             <field name="arch" type="xml">
-                <tree string="Zumo Tree">
+                <tree string="Compra Tree">
                     <field name="code"/>
                     <field name="date"/>
                 </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_vinoteca_cimpra_kanban">
+            <field name="name">vinoteca.compra.kanban</field>
+            <field name="model">vinoteca.compra</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="cliente_id">
+                    <field name="color"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div
+                                    t-attf-class="oe_kanban_color_{{kanban_getcolor(record.color.raw_value)}}
+                                                  oe_kanban_global_click_edit oe_semantic_html_override
+                                                  oe_kanban_card {{record.group_fancy==1 ? 'oe_kanban_card_fancy' : ''}}">
+                                <div class="oe_dropdown_kanban">
+                                    <div class="oe_dropdown_toggle">
+                                        <i class="fa fa-bars fa-lg"/>
+                                        <ul class="oe_dropdown_menu">
+                                            <li>
+                                                <a type="delete">Delete</a>
+                                            </li>
+                                            <li>
+                                                <ul class="oe_kanban_colorpicker"
+                                                    data-field="color"/>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="oe_clear"></div>
+                                </div>
+                                <div t-attf-class="oe_kanban_content">
+                                    Codigo compra:
+                                    <field name="code"/>
+                                    <br/>
+                                    Fecha compra:
+                                    <field name="date"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="compra_calendar_view">
+            <field name="name">compra.calendar</field>
+            <field name="model">vinoteca.compra</field>
+            <field name="arch" type="xml">
+                <calendar string="Compra Calendar" date_start="date" date_stop="date" color="code">
+                    <field name="code"/>
+                </calendar>
             </field>
         </record>
 
